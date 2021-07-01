@@ -37,6 +37,7 @@ const CartScreen=props=>{
                 <FlatList data={cartItems} keyExtractor={(item,idx)=>item.productId}
                     renderItem={itemData=><CartItem quantity={itemData.item.quantity} 
                         title={itemData.item.productTitle} amount={itemData.item.sum}
+                        deletable
                         onRemove={()=>{dispatch(cartActions.removeFromCart(itemData.item.productId))}}
                     />}
                 />
