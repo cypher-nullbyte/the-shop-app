@@ -16,7 +16,8 @@ const EditProductScreen=props=>{
 
     const submitHandler=useCallback(()=>{
         if(editedProduct)   dispatch(productActions.updateProduct(prodId,title,description,imageUrl));
-        else dispatch(productActions.createProduct(title,description,imageUrl,parseFloat(price)));
+        else dispatch(productActions.createProduct(title,description,imageUrl,price? parseFloat(price):0.00));
+        props.navigation.goBack();
     },[dispatch,prodId,title,description,imageUrl,price]);
 
     useEffect(()=>{

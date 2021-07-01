@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlatList,Button, } from 'react-native';
+import { FlatList,Button, Alert, } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import ProductItem from '../../components/shop/ProductItem';
 import { HeaderButtons,Item } from "react-navigation-header-buttons";
@@ -13,6 +13,16 @@ const UserProductsScreen=props=>{
     const editProductHandler=(id)=>{
         props.navigation.navigate('EditProduct',{productId:id});
     };
+
+      const deleteHandler=(id)=>{
+        Alert.alert('Are you Sure?','Do you really want to delete this item?',[
+            {text:'No',style:'default'},
+            {text:'Yes',style:"destructive",onPress:()=>{
+                dispatch(productActions.deleteProduct(id));}
+            }
+        ]);
+    };
+
     return (
     <FlatList 
         data={userProducts} keyExtractor={(item,idx)=>item.id}
@@ -25,11 +35,7 @@ const UserProductsScreen=props=>{
                 <Button color={Colors.primary} title="Edit" 
                         onPress={()=>{editProductHandler(itemData.item.id)}}
                     />
-                <Button color={Colors.primary} title="Delete" onPress={()=>{
-                        dispatch(productActions.deleteProduct(itemData.item.id));
-                        // console.log(itemData.item.id);
-                    }
-                }/>
+                <Button color={Colors.primary} title="Delete" onPress={deleteHandler.bind(null,itemData.item.id)}/>
             </ProductItem>
         )}
     />);
