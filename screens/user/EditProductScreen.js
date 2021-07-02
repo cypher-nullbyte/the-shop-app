@@ -1,47 +1,122 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import {View,Text,StyleSheet,TextInput,ScrollView} from 'react-native';
+import React, { useCallback, useEffect,useReducer } from 'react';
+import {View,Text,StyleSheet,TextInput,ScrollView, Alert} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { HeaderButtons,Item } from "react-navigation-header-buttons";
 import CustomHeaderButton from '../../components/UI/HeaderButton';
 import * as productActions from '../../store/actions/products';
 
+
+const formReducer=(state,action)=>{
+    if(action.type==='UPDATE')
+    {   
+        const updatedValues={
+            ...state.inputValues,
+            [action.input]:action.value
+        };
+
+        const updatedValidities={
+            ...state.inputValidities,
+            [action.input]:action.isValid,
+        }
+        let updatedFormIsValid=true;
+        for(let key in updatedValidities){
+            updatedFormIsValid=updatedFormIsValid&&updatedValidities[key];
+        }
+        return {
+            formIsValid:updatedFormIsValid,
+            inputValues:updatedValues,
+            inputValidities:updatedValidities,
+        }
+    }
+    return state;
+};
+
 const EditProductScreen=props=>{
     const prodId=props.navigation.getParam('productId');
     const editedProduct=useSelector(state=>state.products.userProducts.find(prod=>prod.id===prodId));
     const dispatch=useDispatch();
-    const [title,setTitle]=useState(editedProduct? editedProduct.title : '');
-    const [imageUrl,setImageUrl]=useState(editedProduct? editedProduct.imageUrl : '');
-    const [price,setPrice]=useState(editedProduct? editedProduct.price : '');
-    const [description,setDescription]=useState(editedProduct? editedProduct.description : '');
+
+    const [formState,dispatchFormState]=useReducer(formReducer,
+    {
+        inputValues:{
+            title:editedProduct ? editedProduct.title : "",
+            imageUrl:editedProduct ? editedProduct.imageUrl : "",
+            description:editedProduct? editedProduct.description :"",
+            price: '',
+        },
+        inputValidities:{
+            title: editedProduct ? true:false,
+            imageUrl: editedProduct ? true:false,
+            description: editedProduct ? true:false,
+            price: editedProduct ? true:false,
+        },
+        formIsValid:editedProduct ? true:false,
+    });
+
+    
 
     const submitHandler=useCallback(()=>{
-        if(editedProduct)   dispatch(productActions.updateProduct(prodId,title,description,imageUrl));
-        else dispatch(productActions.createProduct(title,description,imageUrl,price? parseFloat(price):0.00));
+        if(!formState.formIsValid){
+            Alert.alert("Wrong input!","Please Check the errors in form.",[{text:'Okay'}])
+            return;
+        }
+        if(editedProduct) 
+            dispatch(productActions.updateProduct(
+                prodId,
+                formState.inputValues.title,
+                formState.inputValues.description,
+                formState.inputValues.imageUrl
+            ));
+        else 
+            dispatch(productActions.createProduct(
+                formState.inputValues.title,
+                formState.inputValues.description,
+                formState.inputValues.imageUrl,
+                parseFloat(formState.inputValues.price),
+            ));
         props.navigation.goBack();
-    },[dispatch,prodId,title,description,imageUrl,price]);
+    },[dispatch,prodId,formState]);
 
     useEffect(()=>{
         props.navigation.setParams({submit:submitHandler});
     },[submitHandler]);
+
+    const textChangeHandler=(inputIdentifier,text)=>{
+        let isValid=true;
+        if(text.trim().length===0) isValid=false;
+        if(inputIdentifier==='price' && isNaN(parseFloat(text))) isValid=false;
+        dispatchFormState({type:'UPDATE',value:text,isValid:isValid,input:inputIdentifier});
+    };
+
 
     return (
         <ScrollView>
             <View style={styles.form}>
                 <View style={styles.formControl}>
                     <Text style={styles.label}>Title</Text>
-                    <TextInput style={styles.input} value={title} onChangeText={text=>setTitle(text)}/>
+                    <TextInput style={styles.input} value={formState.inputValues.title} 
+                        onChangeText={textChangeHandler.bind(null,'title')} autoCapitalize keyboardType="default"
+                    />
+                    {!formState.inputValidities.title&&<Text>Please Enter a Valid Title!</Text>}
                 </View>
                 <View style={styles.formControl}>
                     <Text style={styles.label}>Image URL</Text>
-                    <TextInput style={styles.input} value={imageUrl} onChangeText={text=>setImageUrl(text)}/>
+                    <TextInput style={styles.input} value={formState.inputValues.imageUrl} 
+                        onChangeText={textChangeHandler.bind(null,'imageUrl')} keyboardType='default' 
+                    />
                 </View>
                 {!editedProduct&&<View style={styles.formControl}>
                     <Text style={styles.label}>Price</Text>
-                    <TextInput style={styles.input} value={price} onChangeText={text=>setPrice(text)}/>
+                    <TextInput style={styles.input} value={formState.inputValues.price}
+
+                        onChangeText={textChangeHandler.bind(null,'price')} keyboardType='decimal-pad' 
+                    />
                 </View>}
                 <View style={styles.formControl}>
                     <Text style={styles.label}>Description</Text>
-                    <TextInput style={styles.input} value={description} onChangeText={text=>setDescription(text)}/>
+                    <TextInput style={styles.input} value={formState.inputValues.description} 
+                        onChangeText={text=>textChangeHandler('description',text)} keyboardType='default' 
+                    />
                 </View>
             </View>
         </ScrollView>
