@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect,useReducer } from 'react';
-import {View,Text,StyleSheet,TextInput,ScrollView, Alert} from 'react-native';
+import {View,StyleSheet,ScrollView, Alert,KeyboardAvoidingView} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { HeaderButtons,Item } from "react-navigation-header-buttons";
 import CustomHeaderButton from '../../components/UI/HeaderButton';
@@ -92,11 +92,12 @@ const EditProductScreen=props=>{
 
 
     return (
+        <KeyboardAvoidingView >
         <ScrollView>
             <View style={styles.form}>
                 <Input 
                     id="title"
-                    title="Title"
+                    label="Title"
                     errorText="Please Enter a Valid Title"
                     keyboardType="default" autoCapitalize="sentences" autoCorrect returnKeyType="next"
                     onInputChange={inputChangeHandler}
@@ -106,7 +107,7 @@ const EditProductScreen=props=>{
                 />
                 <Input 
                     id="imageUrl"
-                    title="ImageUrl"
+                    label="Image Url"
                     errorText="Please Enter a Valid ImageUrl"
                     keyboardType="default"  returnKeyType="next"
                     onInputChange={inputChangeHandler}
@@ -117,7 +118,7 @@ const EditProductScreen=props=>{
                 {!editedProduct&&
                 <Input 
                     id="price"
-                    title="Price"
+                    label="Price"
                     errorText="Please Enter a Valid Price"
                     keyboardType="decimal-pad"  returnKeyType="next"
                     onInputChange={inputChangeHandler}
@@ -128,7 +129,7 @@ const EditProductScreen=props=>{
                 }
                 <Input 
                     id="description"
-                    title="Description"
+                    label="Description"
                     errorText="Please Enter a Valid Description"
                     keyboardType="default" autoCapitalize="sentences" autoCorrect multiline 
                     numberOfLines={3}  //only works with android
@@ -139,6 +140,7 @@ const EditProductScreen=props=>{
                 />
             </View>
         </ScrollView>
+        </KeyboardAvoidingView>
     );
 };
 

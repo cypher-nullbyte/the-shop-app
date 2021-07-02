@@ -8,6 +8,12 @@ import cartReducer from './store/reducers/cart';
 import AppLoading from 'expo-app-loading';
 import * as Font from 'expo-font';
 import {composeWithDevTools} from 'redux-devtools-extension';
+import { LogBox } from 'react-native';
+
+
+LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
+LogBox.ignoreAllLogs();//Ignore all log notifications
+
 const rootReducer=combineReducers({
   products:productsReducer,
   cart:cartReducer,
